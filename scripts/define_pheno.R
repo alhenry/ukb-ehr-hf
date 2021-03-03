@@ -29,7 +29,7 @@ df_basedate <- list_df$baseline %>%
   distinct(eid, .keep_all = T)
 
 # function to join and summarise based on earliest occurence
-join_sum <- function(df, fn_date, col_date, col_code, date_earliest, dict){
+join_sum <- function(df, fn_date, col_date, col_code, dict){
   col_code <- enquo(col_code)
   col_date <- enquo(col_date)
   df %>% 

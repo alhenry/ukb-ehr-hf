@@ -5,7 +5,7 @@
 # different data freeze date
 library(survival)
 library(lubridate)
-source("scripts/define_hf.R")
+source("scripts/define_pheno.R")
 
 date_censored <- ymd("2016-02-28")
 
