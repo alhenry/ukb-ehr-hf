@@ -22,13 +22,22 @@ list_df_code <- readxl::read_excel("resources/code_list/2021-01-19_clean_pheno.x
   nest %>% 
   deframe
 
+df_basedate <- list_df$baseline %>% 
+  filter(field == 53, i == 0, n == 0) %>% 
+  mutate(date_attending = ymd(value)) %>% 
+  select(eid, date_attending) %>% 
+  distinct(eid, .keep_all = T)
+
 # function to join and summarise based on earliest occurence
-join_sum <- function(df, fn_date, col_date, col_code, dict){
+join_sum <- function(df, fn_date, col_date, col_code, date_earliest, dict){
   col_code <- enquo(col_code)
   col_date <- enquo(col_date)
   df %>% 
-    filter(!is.na(!!col_date)) %>% 
+    inner_join(df_basedate, by = "eid") %>% 
     mutate(date_diag = fn_date(!!col_date)) %>% 
+    filter(!is.na(!!col_date),
+           # remove 'special dates' in gp data
+           date_diag > ymd("1903-03-03")) %>%
     select(eid, date_diag, code = !!col_code) %>% 
     inner_join(list_df_code[[dict]],
                by = c(code = "code_clean")) %>%
@@ -43,11 +52,7 @@ df_diag <- bind_rows(
   list_df$oper %>% join_sum(ymd, opdate, oper4, "opcs")
 )
 
-df_basedate <- list_df$baseline %>% 
-  filter(field == 53, i == 0, n == 0) %>% 
-  mutate(date_attending = ymd(value)) %>% 
-  select(eid, date_attending) %>% 
-  distinct(eid, .keep_all = T)
+
 
 df_death_all <- vroom("resources/data/death.txt.gz") %>% 
   mutate(date_of_death = dmy(date_of_death)) %>% 
