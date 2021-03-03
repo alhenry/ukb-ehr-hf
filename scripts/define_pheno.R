@@ -42,15 +42,15 @@ join_sum <- function(df, fn_date, col_date, col_code, dict){
     inner_join(list_df_code[[dict]],
                by = c(code = "code_clean")) %>%
     mutate(dict = dict) %>% 
-    group_by(eid, pheno) %>% 
-    filter(date_diag == min(date_diag, na.rm = T))
+    group_by(eid, pheno)
 }
 
 df_diag <- bind_rows(
   list_df$hes %>% join_sum(ymd, admidate, icd10, "icd10"),
   list_df$gp %>% join_sum(ymd, event_dt, read_code, "read"),
   list_df$oper %>% join_sum(ymd, opdate, oper4, "opcs")
-)
+) %>% 
+  filter(date_diag == min(date_diag, na.rm = T))
 
 
 
